@@ -1,9 +1,10 @@
 import random, csv
+from datetime import date
 
 def main():
     path = new_user()
     answers = quiz_handler(quiz())
-    result(path, answers)
+    store_answers(path, answers)
 
 def new_user():
     while True:
@@ -19,7 +20,7 @@ def new_user():
                 
             id = find_user(name)
             if id:
-                print(f"Hello {name} by this {id}.")
+                print(f"Hello {name} by this {id}.\n")
                 return f"Users/{id}.csv"
                 
             elif id == None:
@@ -67,31 +68,46 @@ def save_user(name, age, sex):
     return id
     
 def quiz():
+    QH = load_questions("Questions/hard.csv")
+    QF = load_questions("Questions/funny.csv")
+    QC = load_questions("Questions/couple.csv")
+    
+    Quiz = []
+
+    Quiz.extend(random.sample(QH, 3))
+    Quiz.extend(random.sample(QF, 3))
+    Quiz.extend(random.sample(QC, 3))
+
+    return Quiz
+
+def load_questions(file_path):
     lines = []
-    with open("Questions/question.csv", 'r') as file:
+    with open(file_path, 'r') as file:
         reader = csv.reader(file)
         for row in reader:
             lines.append({"one":row[0], "two":row[1].strip()})
     
     return lines
 
-def quiz_handler(lines):
+def quiz_handler(quiz):
     answers = []
-    for line in range(len(lines)):
-        print(f"Would you rather {lines[line]['one']} or {lines[line]['two']}?")
+    for question in range(9):
+        print(f"Would you rather {quiz[question]['one']} or {quiz[question]['two']}?")
         answer = input().strip().lower()
         if answer == 'a':
-            answers.append(lines[line]['one'])
+            answers.append(quiz[question]['one'])
         elif answer == 'b':
-            answers.append(lines[line]['two'])
+            answers.append(quiz[question]['two'])
         else:
             print("You must entered only A or B keys on keyboard.")
             answers.append("Null")
     
     return answers
 
-def result(path, answers):
+def store_answers(path, answers):
+    today = str(date.today())
     with open(path, 'a') as file:
+        file.writelines(f"\n{today}\n")
         for row in answers:
             file.writelines(f"{row}\n")
 
